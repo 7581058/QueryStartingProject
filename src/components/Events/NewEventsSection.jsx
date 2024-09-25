@@ -1,52 +1,31 @@
-import { useEffect, useState } from 'react';
-
-import LoadingIndicator from '../UI/LoadingIndicator.jsx';
-import ErrorBlock from '../UI/ErrorBlock.jsx';
-import EventItem from './EventItem.jsx';
+import { useQuery } from "@tanstack/react-query";
+import LoadingIndicator from "../UI/LoadingIndicator.jsx";
+import ErrorBlock from "../UI/ErrorBlock.jsx";
+import EventItem from "./EventItem.jsx";
+import { fetchEvents } from "../../util/http.js";
 
 export default function NewEventsSection() {
-  const [data, setData] = useState();
-  const [error, setError] = useState();
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    async function fetchEvents() {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:3000/events');
-
-      if (!response.ok) {
-        const error = new Error('An error occurred while fetching the events');
-        error.code = response.status;
-        error.info = await response.json();
-        throw error;
-      }
-
-      const { events } = await response.json();
-
-      return events;
-    }
-
-    fetchEvents()
-      .then((events) => {
-        setData(events);
-      })
-      .catch((error) => {
-        setError(error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const { data, isPending, isError, error } = useQuery({
+    //쿼리키, 전송하는 모든 요청에는 쿼리 키가 있음
+    //내부에서 키를 이용해 요청으로 생성된 데이터를 캐시 처리함
+    //=> 동일 요청시 이전 요청 응답을 재사용 => 사용자에게 데이터를 더 빨리 제공 할 수 있게 해줌
+    queryKey: ["events"],
+    //쿼리함수, 실제 요청을 전송할 때 실행할 실제 코드를 정의
+    queryFn: fetchEvents,
+  });
 
   let content;
 
-  if (isLoading) {
+  if (isPending) {
     content = <LoadingIndicator />;
   }
 
-  if (error) {
+  if (isError) {
     content = (
-      <ErrorBlock title="An error occurred" message="Failed to fetch events" />
+      <ErrorBlock
+        title="An error occurred"
+        message={error.info?.message || "Failed to fetch events."}
+      />
     );
   }
 

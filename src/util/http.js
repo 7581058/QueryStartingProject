@@ -1,13 +1,13 @@
 /*
 데이터 가져오기를 제어하는 모든 코드 담기
 */
-export async function fetchEvents(searchTerm) {
+export async function fetchEvents({ signal, searchTerm }) {
   let url = "http://localhost:3000/events";
 
   if (searchTerm) {
     url += "?search=" + searchTerm;
   }
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: signal });
 
   if (!response.ok) {
     const error = new Error("An error occurred while fetching the events");

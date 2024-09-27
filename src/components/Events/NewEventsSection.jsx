@@ -12,6 +12,8 @@ export default function NewEventsSection() {
     queryKey: ["events"],
     //쿼리함수, 실제 요청을 전송할 때 실행할 실제 코드를 정의
     queryFn: fetchEvents,
+    staleTime: 5000,
+    //gcTime:
   });
 
   let content;
